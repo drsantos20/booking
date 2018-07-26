@@ -1,7 +1,10 @@
 package controllers
 
 import (
+	"github.com/drsantos20/booking/app/models"
+	"github.com/revel/examples/booking/app/routes"
 	"github.com/revel/revel"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type App struct {
@@ -24,4 +27,28 @@ func (c App) Hello(myName string) revel.Result {
 	}
 
 	return c.Render(myName)
+}
+
+func (c App) SaveUser(user models.User, verifyPassword string) revel.Result {
+	c.Validation.Required(verifyPassword)
+	c.Validation.Required(verifyPassword == user.Password).
+		MessageKey("Password does not match")
+	user.Validate(c.Validation)
+
+	if c.Validation.HasErrors() {
+		c.Validation.Keep()
+		c.FlashParams()
+		return c.Redirect(routes.Application.Register())
+	}
+
+	user.HashedPassword, _ = bcrypt.GenerateFromPassword(
+		[]byte(user.Password), bcrypt.DefaultCost)
+	err := c.Txn.Insert(&user)
+	if err != nil {
+		panic(err)
+	}
+
+	c.Session["user"] = user.Username
+	c.Flash.Success("Welcome, " + user.Name)
+	return c.Redirect(routes.Hotels.Index())
 }

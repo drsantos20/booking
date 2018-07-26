@@ -1,7 +1,11 @@
 package app
 
 import (
+	rgorp "github.com/revel/modules/orm/gorp/app"
 	"github.com/revel/revel"
+	"github.com/revel/samples/booking/app/models"
+	"golang.org/x/crypto/bcrypt"
+	gorp "gopkg.in/gorp.v2"
 )
 
 var (
@@ -28,6 +32,33 @@ func init() {
 		revel.CompressFilter,          // Compress the result.
 		revel.ActionInvoker,           // Invoke the action.
 	}
+
+	revel.OnAppStart(func() {
+		Dbm := rgorp.Db.Map
+		setColumnSizes := func(t *gorp.TableMap, colSizes map[string]int) {
+			for col, size := range colSizes {
+				t.ColMap(col).MaxSize = size
+			}
+		}
+
+		t := Dbm.AddTable(models.User{}).SetKeys(true, "UserId")
+		t.ColMap("Password").Transient = true
+		setColumnSizes(t, map[string]int{
+			"Username": 20,
+			"Name":     100,
+		})
+
+		rgorp.Db.TraceOn(revel.AppLog)
+		Dbm.CreateTables()
+
+		bcryptPassword, _ := bcrypt.GenerateFromPassword(
+			[]byte("demo"), bcrypt.DefaultCost)
+		demoUser := &models.User{0, "Demo User", "demo", "demo", bcryptPassword}
+		if err := Dbm.Insert(demoUser); err != nil {
+			panic(err)
+		}
+
+	}, 5)
 
 	// Register startup functions with OnAppStart
 	// revel.DevMode and revel.RunMode only work inside of OnAppStart. See Example Startup Script
