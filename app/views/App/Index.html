@@ -1,14 +1,31 @@
 {{set . "title" "Home"}}
 {{template "header.html" .}}
 
-<header class="jumbotron" style="background-color:#A9F16C">
+
+<div class="jumbotron jumbotron-fullheight jumbo-vertical-center text-light text-center bg-dark mb-0 radius-0">
   <div class="container">
-    <div class="row">
-      <h1>{{.greeting}}</h1>
-      <p></p>
-    </div>
+
+      <h1 class="display-2 text-light text-uppercase">Hello World</h1>
+      <span class="lead lead-lg">This is a starter template with a jumbotron</span>
+
+      <div class="mt-4">
+        <h1>{{.greeting}}</h1>
+        <p></p>
+      </div>
+
+      <div class="mt-4">
+        <a href="#!"
+           class="btn btn-danger btn-lg m-2 btn-wide">
+          <span>A Button</span>
+        </a>
+
+        <a href="#!"
+           class="btn btn-outline-light btn-hover-text-dark btn-wide btn-lg m-2">
+          <span>Another button</span>
+        </a>
+      </div>
   </div>
-</header>
+</div>
 
 <div class="container">
   <div class="row">
